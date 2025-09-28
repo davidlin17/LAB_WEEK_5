@@ -3,6 +3,7 @@ package com.example.myapplication
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
+import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -35,6 +36,16 @@ class MainActivity : AppCompatActivity() {
         findViewById(R.id.api_response)
     }
 
+    // ImageView reference
+    private val imageResultView: ImageView by lazy {
+        findViewById(R.id.image_result)
+    }
+
+    // ImageLoader reference (pakai GlideLoader)
+    private val imageLoader: GlideLoader by lazy {
+        GlideLoader(this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -63,7 +74,14 @@ class MainActivity : AppCompatActivity() {
             ) {
                 if (response.isSuccessful) {
                     val image = response.body()
-                    val firstImage = image?.firstOrNull()?.url ?: "No URL"
+                    val firstImage = image?.firstOrNull()?.url.orEmpty()
+
+                    if (firstImage.isNotBlank()) {
+                        imageLoader.loadImage(firstImage, imageResultView)
+                    } else {
+                        Log.d(MAIN_ACTIVITY, "Missing image URL")
+                    }
+
                     apiResponseView.text = getString(R.string.image_placeholder, firstImage)
                 } else {
                     Log.e(
